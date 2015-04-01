@@ -3,6 +3,8 @@
 This program collects abuse information from the auth.log* files, when using WP fail2ban for Wordpress.
 It was initial written to ease the process from collection informations about abuse on a Wordpress server and send it to the ISP.
 
+I'm using it to send monthly abuse reports to the three most spamming ISPs.
+
 I tested it with Debian 7.6, Wordpress 4.* and WP fail2ban 2.3.0
 
 The program searches in the log files for lines like:
@@ -50,7 +52,6 @@ Mar  8 13:55:32 sgc wordpress(www.tl-photography.at)[1983]: Authentication failu
 ... <br>
 Apr  1 00:12:29 sgc wordpress(www.tl-photography.at)[2199]: Authentication failure for admin from 159.20.165.9 <br>
 Apr  1 09:36:11 sgc wordpress(www.tl-photography.at)[8961]: Authentication failure for admin from 159.20.144.199 <br>
-
 
 There will be maybe a large number of not found entries. This cannot be fixed completely, since some of the entries do not have a adress with "abuse" in the name. 
 
