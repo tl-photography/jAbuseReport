@@ -1,1 +1,3 @@
 /bin/
+auth.log*
+/test/
