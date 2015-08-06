@@ -1,4 +1,4 @@
-# jAbsueReport
+# jAbuseReport
 
 This program collects abuse information from the auth.log* files, when using WP fail2ban for Wordpress.
 It was initial written to ease the process from collection informations about abuse on a Wordpress server and send it to the ISP.
