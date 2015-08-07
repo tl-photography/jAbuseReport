@@ -45,17 +45,7 @@ import org.apache.commons.net.whois.WhoisClient;
  * The Main Class.
  */
 public class Reporter
-{
-	
-	/** The log directory. */
-	private static String										logDir;
-	
-	/** The standard name for the log files. */
-	private static CharSequence							logNames	= "auth.log";
-	
-	/** The content. */
-	private static HashMap<String, String>	content		= new HashMap<String, String>();
-	
+{	
 	/**
 	 * The main method.
 	 *
@@ -64,7 +54,12 @@ public class Reporter
 	 */
 	public static void main(String[] args)
 	{
-		parseArguments(args);
+		
+		CharSequence logNames = "auth.log";
+		HashMap<String, String>	content		= new HashMap<String, String>();
+		
+		String logDir = parseArguments(args);
+				
 		
 		File[] directory = new File(logDir).listFiles(); // get the files in the dir
 		
@@ -360,11 +355,13 @@ public class Reporter
 	{
 		if (args.length > 0)
 		{
-			logDir = args[0];
+			String logDir = args[0];
 		} else
 		{
 			System.err.println("Directory to log files is mandatory");
 		}
+		
+		return logDir;
 		
 	}
 	
