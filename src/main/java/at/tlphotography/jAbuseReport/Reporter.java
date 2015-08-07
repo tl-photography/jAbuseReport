@@ -136,12 +136,39 @@ public class Reporter {
 	 * @return the string
 	 */
 	private static String whoIsLookUp(String ip) {
-		String[] serverList = { "whois.ripe.net", "whois.lacnic.net", "whois.registro.br" };
+		String[] serverList = { "whois.ripe.net", "whois.lacnic.net", "whois.registro.br", "whois.nic.ac",
+				"whois.aeda.net.ae", "whois.aero", "whois.nic.af", "whois.nic.ag", "whois.ripe.net", "whois.amnic.net",
+				"whois.nic.as", "whois.nic.asia", "whois.nic.at", "whois.aunic.net", "whois.ax", "whois.dns.be",
+				"whois.register.bg", "whois.nic.bi", "whois.neulevel.biz", "www.nic.bj", "whois.nic.br",
+				"whois.centralnic.com", "whois.netnames.net", "whois.cctld.by", "whois.belizenic.bz", "whois.cira.ca",
+				"whois.cat", "whois.nic.cc", "whois.nic.cd", "whois.nic.ch", "whois.nic.ck", "whois.nic.cl",
+				"whois.cnnic.net.cn", "whois.nic.co", "whois.co.nl", "whois.verisign-grs.com", "whois.nic.coop",
+				"whois.nic.cx", "whois.nic.cz", "whois.denic.de", "whois.dk-hostmaster.dk", "whois.nic.dz",
+				"whois.educause.net", "whois.tld.ee", "whois.nic.es", "whois.eu", "whois.ficora.fi", "whois.nic.fo",
+				"whois.nic.fr", "whois.nic.gl", "whois.nic.gov", "whois.nic.gs", "whois.hknic.net.hk",
+				"whois.registry.hm", "whois2.afilias-grs.net", "whois.dns.hr", "whois.nic.hu", "whois.pandi.or.id",
+				"whois.domainregistry.ie", "whois.isoc.org.il", "whois.inregistry.net", "whois.afilias.info",
+				"whois.isi.edu", "whois.nic.io", "vrx.net", "whois.nic.ir", "whois.isnic.is", "whois.nic.it",
+				"whois.je", "jobswhois.verisign-grs.com", "whois.jprs.jp", "whois.kenic.or.ke", "whois.domain.kg",
+				"whois.nic.or.kr", "whois.nic.li", "whois.domreg.lt", "whois.restena.lu", "whois.nic.lv",
+				"whois.lydomains.com", "whois.iam.net.ma", "whois.nic.md", "whois.nic.me", "whois.nic.mil",
+				"whois.dotmobiregistry.net", "whois.nic.ms", "whois.nic.mu", "whois.nic.mx", "whois.mynic.net.my",
+				"whois.nic.name", "whois.nic.net.ng", "whois.domain-registry.nl", "whois.norid.no", "whois.nic.nu",
+				"whois.srs.net.nz", "whois.pir.org", "whois.dns.pl", "whois.nic.pr", "whois.registrypro.pro",
+				"whois.dns.pt", "whois.nic.pw", "whois.rotld.ro", "whois.tcinet.ru", "saudinic.net.sa",
+				"whois.nic.net.sb", "whois.nic-se.se", "whois.nic.net.sg", "whois.nic.sh", "whois.arnes.si",
+				"whois.sk-nic.sk", "whois.nic.sm", "whois.nic.st", "whois.nic.so", "whois.adamsnames.tc",
+				"whois.nic.tel", "whois.nic.tf", "whois.thnic.net", "whois.nic.tj", "whois.nic.tk", "whois.domains.tl",
+				"whois.nic.tm", "whois.ati.tn", "whois.tonic.to", "whois.nic.tr", "whois.nic.travel",
+				"whois.twnic.net.tw", "whois.nic.tv", "whois.tznic.or.tz", "whois.ua", "whois.nic.uk", "whois.ja.net",
+				"whois.nic.us", "nic.uy", "whois.cctld.uz", "whois.nic.ve", "whois.website.ws", "whois.nic.xxx" };
 
 		WhoisClient whois = new WhoisClient();
-		try {
-			for (String server : serverList) {
-				logger.debug("try server '" + server + "'");
+
+		for (String server : serverList) {
+
+			logger.debug("try server '" + server + "'");
+			try {
 				whois.connect(server);
 				String whoisData = whois.query(ip);
 				StringBuilder result = new StringBuilder("");
@@ -149,27 +176,28 @@ public class Reporter {
 				result.append(whoisData);
 
 				String mail = extractEMail(result.toString());
-
 				if (mail != null)
 					return mail;
-			}
-			return "not found";
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			logger.error(e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			logger.error(e);
-		} finally {
-			try {
-				if (whois.isConnected())
-					whois.disconnect();
+			} catch (SocketException e) {
+				// TODO Auto-generated catch block
+				logger.error(e);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				logger.error(e);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				logger.error(e);
+			} finally {
+				try {
+					if (whois.isConnected())
+						whois.disconnect();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.error(e);
+				}
 			}
 		}
-		return null;
+		return "not found";
 	}
 
 	/**
