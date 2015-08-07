@@ -13,4 +13,14 @@
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/commons-cli/commons-cli/1.3.1/53872c7f3192ae4c449bfa8ce203b4549110b478/commons-cli-1.3.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry sourcepath="C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.3/2083f2f885111e2d672a28b5657c465360559663/log4j-api-2.3-sources.jar" kind="lib" path="C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.3/8d85ef2675d1b45fe78adad021f809bdf12f2eeb/log4j-api-2.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.3/a2cca02f1edf32cbf5b6d7b7f32785ebcc51952d/log4j-api-2.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.3/25185a3609b7a37dcb152daab7d9855cb4e915b6/log4j-core-2.3-sources.jar" kind="lib" path="C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.3/58a3e964db5307e30650817c5daac1e8c8ede648/log4j-core-2.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/z00253tm/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.3/fd9665172cee688b1555b139dcfa487da3c33e1d/log4j-core-2.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 </classpath>

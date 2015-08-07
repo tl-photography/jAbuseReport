@@ -46,18 +46,22 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.net.whois.WhoisClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Main Class.
  */
 public class Reporter {
-	
+
+	private static final Logger logger = LogManager.getLogger("jAbuseReport");
+
 	/**
-	 * the command line options 
+	 * the command line options
 	 */
-	private static CommandLine cmd; 
-	
+	private static CommandLine cmd;
+
 	/**
 	 * The main method.
 	 *
@@ -65,22 +69,28 @@ public class Reporter {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
-
+		logger.info("starting");
 		CharSequence logNames = "auth.log";
 		HashMap<String, String> content = new HashMap<String, String>();
 
+		logger.debug("parsing command lines");
 		cmd = parseArguments(args);
 
 		// get the files in the dir
-		File[] directory = new File(cmd.getOptionValue('d')).listFiles();
+		File directory = new File(cmd.getOptionValue('d'));
+		File[] filesInDirectory = directory.listFiles();
+		logger.debug("searching directory (" + directory.getAbsolutePath() + ")");
 
-		for (File file : directory) // iterate over the file
+		for (File file : filesInDirectory) // iterate over the file
 		{
 			// if the file is not a dir and the name contains the logName string
 			if (!file.isDirectory() && file.getName().contains(logNames)) {
+				logger.debug("found file '" + file.getAbsolutePath() + "', reading...");
 				content.putAll(readLogFile(file));
 			}
 		}
+
+		logger.info("done reading log files");
 
 		// save the mails to the log lines
 		HashMap<String, ArrayList<LogObject>> finalContent = new HashMap<>();
@@ -89,7 +99,7 @@ public class Reporter {
 		while (it.hasNext()) {
 			Map.Entry<String, String> pair = it.next();
 			String mail = whoIsLookUp(pair.getKey());
-
+			logger.info("found mail (" + mail + ") for entry " + pair.getKey());
 			if (finalContent.containsKey(mail)) {
 				finalContent.get(mail).add(new LogObject(pair.getValue()));
 			} else {
@@ -101,6 +111,7 @@ public class Reporter {
 			it.remove();
 		}
 
+		logger.info("sorting the entries");
 		// sort them
 		Iterator<Entry<String, ArrayList<LogObject>>> it2 = finalContent.entrySet().iterator();
 		while (it2.hasNext()) {
@@ -130,11 +141,12 @@ public class Reporter {
 		WhoisClient whois = new WhoisClient();
 		try {
 			for (String server : serverList) {
+				logger.debug("try server '" + server + "'");
 				whois.connect(server);
-				String whoisData1 = whois.query(ip);
+				String whoisData = whois.query(ip);
 				StringBuilder result = new StringBuilder("");
-				
-				result.append(whoisData1);
+
+				result.append(whoisData);
 
 				String mail = extractEMail(result.toString());
 
@@ -144,17 +156,17 @@ public class Reporter {
 			return "not found";
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			try {
 				if (whois.isConnected())
 					whois.disconnect();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return null;
@@ -216,10 +228,10 @@ public class Reporter {
 			}
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find '" + file.getAbsolutePath() + "'");
-			e.printStackTrace();
+			logger.error(e);
 		} catch (IOException e) {
 			System.err.println("Could not read '" + file.getAbsolutePath() + "'");
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			// close all
 			try {
@@ -228,7 +240,7 @@ public class Reporter {
 			} catch (IOException e) {
 
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return content;
@@ -302,7 +314,7 @@ public class Reporter {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			System.err.println("Could not parse command line arguments");
-			e.printStackTrace();
+			logger.error(e);
 		}
 
 		// if the directory is not set, exit
