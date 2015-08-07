@@ -16,5 +16,6 @@ eclipse {
     classpath {
        downloadSources=true
        downloadJavadoc=true
+       sourceCompatibility = 1.7
     }
 }
