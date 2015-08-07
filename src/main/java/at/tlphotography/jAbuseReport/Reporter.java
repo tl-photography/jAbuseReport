@@ -38,144 +38,142 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.net.whois.WhoisClient;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Main Class.
  */
-public class Reporter
-{	
+public class Reporter {
+	
+	/**
+	 * the command line options 
+	 */
+	private static CommandLine cmd; 
+	
 	/**
 	 * The main method.
 	 *
 	 * @param args
-	 *          the arguments
+	 *            the arguments
 	 */
-	public static void main(String[] args)
-	{
-		
+	public static void main(String[] args) {
+
 		CharSequence logNames = "auth.log";
-		HashMap<String, String>	content		= new HashMap<String, String>();
-		
-		String logDir = parseArguments(args);
-				
-		File[] directory = new File(logDir).listFiles(); // get the files in the dir
-		
+		HashMap<String, String> content = new HashMap<String, String>();
+
+		cmd = parseArguments(args);
+
+		// get the files in the dir
+		File[] directory = new File(cmd.getOptionValue('d')).listFiles();
+
 		for (File file : directory) // iterate over the file
 		{
-			if (!file.isDirectory() && file.getName().contains(logNames)) // if the file is not a dir and the name contains the logName string
-			{
+			// if the file is not a dir and the name contains the logName string
+			if (!file.isDirectory() && file.getName().contains(logNames)) {
 				content.putAll(readLogFile(file));
 			}
 		}
-		
+
 		// save the mails to the log lines
 		HashMap<String, ArrayList<LogObject>> finalContent = new HashMap<>();
-				
+
 		Iterator<Entry<String, String>> it = content.entrySet().iterator();
-		while (it.hasNext())
-		{
+		while (it.hasNext()) {
 			Map.Entry<String, String> pair = it.next();
 			String mail = whoIsLookUp(pair.getKey());
-			
-			if (finalContent.containsKey(mail))
-			{
+
+			if (finalContent.containsKey(mail)) {
 				finalContent.get(mail).add(new LogObject(pair.getValue()));
-			} else
-			{
+			} else {
 				ArrayList<LogObject> temp = new ArrayList<LogObject>();
 				temp.add(new LogObject(pair.getValue()));
 				finalContent.put(mail, temp);
 			}
-			
+
 			it.remove();
 		}
-		
+
 		// sort them
 		Iterator<Entry<String, ArrayList<LogObject>>> it2 = finalContent.entrySet().iterator();
-		while (it2.hasNext())
-		{
+		while (it2.hasNext()) {
 			Entry<String, ArrayList<LogObject>> pair = it2.next();
 			Collections.sort(pair.getValue());
 			println(pair.getKey() + " =");
-			for (LogObject obj : pair.getValue())
-			{
+			for (LogObject obj : pair.getValue()) {
 				println(obj.logContent);
 			}
-			
+
 			println("\n");
 			it2.remove();
 		}
-		
+
 	}
-	
+
 	/**
 	 * Whois look up.
 	 *
 	 * @param ip
-	 *          the ip
+	 *            the ip
 	 * @return the string
 	 */
-	private static String whoIsLookUp(String ip)
-	{
+	private static String whoIsLookUp(String ip) {
 		String[] serverList = { "whois.ripe.net", "whois.lacnic.net", "whois.registro.br" };
-		
+
 		WhoisClient whois = new WhoisClient();
-		try
-		{
-			for (String server : serverList)
-			{
+		try {
+			for (String server : serverList) {
 				whois.connect(server);
 				String whoisData1 = whois.query(ip);
-				StringBuilder result = new StringBuilder("");;
+				StringBuilder result = new StringBuilder("");
+				
 				result.append(whoisData1);
-				
+
 				String mail = extractEMail(result.toString());
-				
+
 				if (mail != null)
 					return mail;
 			}
 			return "not found";
-		} catch (SocketException e)
-		{
+		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e)
-		{
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally
-		{
-			try
-			{
+		} finally {
+			try {
 				if (whois.isConnected())
 					whois.disconnect();
-			} catch (IOException e)
-			{
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Extracts a eMail from string.
 	 *
 	 * @param string
-	 *          the string
+	 *            the string
 	 * @return the string
 	 */
-	private static String extractEMail(String string)
-	{
+	private static String extractEMail(String string) {
 		String EMAILADDRESS_PATTERN = "[a-zA-Z0-9_.-]*abuse[a-zA-Z0-9_.-]*@[a-zA-Z0-9_.-]*\\.[a-zA-Z0-9_.-]{2,4}";
-		
+
 		Pattern pattern = Pattern.compile(EMAILADDRESS_PATTERN);
-		
+
 		Matcher matcher = pattern.matcher(string);
-		if (matcher.find())
-		{
+		if (matcher.find()) {
 			String mail = (matcher.group(0));
 			if (mail.contains("cert.br"))
 				return null;
@@ -184,136 +182,139 @@ public class Reporter
 		} else
 			return null;
 	}
-	
+
 	/**
 	 * Reads a log file.
 	 *
 	 * @param file
-	 *          the file
+	 *            the file
 	 * @return the hash map
 	 */
-	private static HashMap<String, String> readLogFile(File file)
-	{
+	private static HashMap<String, String> readLogFile(File file) {
 		BufferedReader br = null;
 		HashMap<String, String> content = new HashMap<String, String>();
-		
-		try
-		{
+
+		try {
 			// open file
-			
+
 			// is it zipped?
-			if(file.getName().endsWith(".gz"))
-			{
+			if (file.getName().endsWith(".gz")) {
 				// open compressed file
 				GZIPInputStream gzip = new GZIPInputStream(new FileInputStream(file));
 				br = new BufferedReader(new InputStreamReader(gzip));
-			}else
-			{
+			} else {
 				br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 			}
-			
+
 			// read it
 			String line;
-			while ((line = br.readLine()) != null)
-			{
-				if (checkLine(line))
-				{
+			while ((line = br.readLine()) != null) {
+				if (checkLine(line)) {
 					String addr = extractIp(line);
 					content.put(addr, line);
 				}
 			}
-		} catch (FileNotFoundException e)
-		{
+		} catch (FileNotFoundException e) {
 			System.err.println("Could not find '" + file.getAbsolutePath() + "'");
-		} catch (IOException e)
-		{
+			e.printStackTrace();
+		} catch (IOException e) {
 			System.err.println("Could not read '" + file.getAbsolutePath() + "'");
-		} finally
-		{
+			e.printStackTrace();
+		} finally {
 			// close all
-			try
-			{
+			try {
 				if (br != null)
 					br.close();
-			} catch (IOException e)
-			{
-				
+			} catch (IOException e) {
+
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return content;
 	}
-	
+
 	/**
 	 * Check line.
 	 *
 	 * @param line
-	 *          the line
+	 *            the line
 	 * @return true, if successful
 	 */
-	private static boolean checkLine(String line)
-	{
-		
+	private static boolean checkLine(String line) {
+
 		String regex = ".*Authentication failure for .* from .*";
-		
+
 		return line.matches(regex);
 	}
-	
+
 	/**
 	 * Extracts a ip from the input string.
 	 *
 	 * @param line
-	 *          the line
+	 *            the line
 	 * @return the string
 	 */
-	private static String extractIp(String line)
-	{
+	private static String extractIp(String line) {
 		String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-		
+
 		Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
 		Matcher matcher = pattern.matcher(line);
-		if (matcher.find())
-		{
+		if (matcher.find()) {
 			return matcher.group();
-		} else
-		{
+		} else {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Print a line.
 	 *
 	 * @param string
-	 *          the string
+	 *            the string
 	 */
-	private static void println(String string)
-	{
+	private static void println(String string) {
 		System.out.println(string);
 	}
-	
+
 	/**
 	 * Parses the arguments.
 	 *
 	 * @param args
-	 *          the arguments
-	 * @return 
+	 *            the arguments
+	 * @return
 	 */
-	private static String parseArguments(String[] args)
-	{
-		String logDir = null;
-		
-		if (args.length > 0)
-		{
-			logDir = args[0];
-		} else
-		{
-			System.err.println("Directory to log files is mandatory");
+	private static CommandLine parseArguments(String[] args) {
+
+		// create Options object
+		Options options = new Options();
+
+		// add option
+		Option path = new Option("d", "dir", true, "path to log files");
+		Option proxy = new Option("p", "proxy", true, "use a proxy server for whois lookup (xxx.xxx.xxx.xxx:yyyy)");
+
+		options.addOption(path);
+		options.addOption(proxy);
+
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cmd = null;
+		try {
+			cmd = parser.parse(options, args);
+		} catch (ParseException e) {
+			System.err.println("Could not parse command line arguments");
+			e.printStackTrace();
 		}
-		
-		return logDir;
-		
+
+		// if the directory is not set, exit
+		if (!cmd.hasOption('d')) {
+			System.err.println("log file directory (-d) not set in arguments");
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("jAbuseReport", options);
+			System.exit(0);
+		}
+
+		return cmd;
+
 	}
-	
+
 }
