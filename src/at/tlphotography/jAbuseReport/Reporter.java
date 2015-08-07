@@ -60,20 +60,13 @@ public class Reporter
 		
 		String logDir = parseArguments(args);
 				
-		
 		File[] directory = new File(logDir).listFiles(); // get the files in the dir
 		
 		for (File file : directory) // iterate over the file
 		{
 			if (!file.isDirectory() && file.getName().contains(logNames)) // if the file is not a dir and the name contains the logName string
 			{
-				if (file.getName().endsWith(".gz")) // is it zipped?
-				{
-					content.putAll(readGZFile(file));
-				} else
-				{
-					content.putAll(readLogFile(file));
-				}
+				content.putAll(readLogFile(file));
 			}
 		}
 		
@@ -207,7 +200,17 @@ public class Reporter
 		try
 		{
 			// open file
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			
+			// is it zipped?
+			if(file.getName().endsWith(".gz"))
+			{
+				// open compressed file
+				GZIPInputStream gzip = new GZIPInputStream(new FileInputStream(file));
+				br = new BufferedReader(new InputStreamReader(gzip));
+			}else
+			{
+				br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			}
 			
 			// read it
 			String line;
@@ -232,61 +235,6 @@ public class Reporter
 			{
 				if (br != null)
 					br.close();
-			} catch (IOException e)
-			{
-				
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return content;
-	}
-	
-	/**
-	 * Read gz file.
-	 *
-	 * @param file
-	 *          the file
-	 * @return the content hash map
-	 */
-	private static HashMap<String, String> readGZFile(File file)
-	{
-		GZIPInputStream gzip = null;
-		BufferedReader br = null;
-		
-		HashMap<String, String> content = new HashMap<String, String>();
-		
-		try
-		{
-			// open compressed file
-			gzip = new GZIPInputStream(new FileInputStream(file));
-			br = new BufferedReader(new InputStreamReader(gzip));
-			
-			// read it
-			String line;
-			while ((line = br.readLine()) != null)
-			{
-				if (checkLine(line))
-				{
-					String addr = extractIp(line);
-					content.put(addr, line);
-				}
-			}
-		} catch (FileNotFoundException e)
-		{
-			System.err.println("Could not find '" + file.getAbsolutePath() + "'");
-		} catch (IOException e)
-		{
-			System.err.println("Could not read '" + file.getAbsolutePath() + "'");
-		} finally
-		{
-			// close all
-			try
-			{
-				if (br != null)
-					br.close();
-				if (gzip != null)
-					gzip.close();
 			} catch (IOException e)
 			{
 				
@@ -350,12 +298,15 @@ public class Reporter
 	 *
 	 * @param args
 	 *          the arguments
+	 * @return 
 	 */
-	private static void parseArguments(String[] args)
+	private static String parseArguments(String[] args)
 	{
+		String logDir = null;
+		
 		if (args.length > 0)
 		{
-			String logDir = args[0];
+			logDir = args[0];
 		} else
 		{
 			System.err.println("Directory to log files is mandatory");
