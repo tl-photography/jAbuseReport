@@ -1,0 +1,20 @@
+def projectName = 'jAbuseReport'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+dependencies {
+  compile group: 'commons-net', name: 'commons-net', version: '3.3'
+}
+
+repositories {   
+    mavenCentral()
+}
+
+eclipse {
+    classpath {
+       downloadSources=true
+       downloadJavadoc=true
+    }
+}

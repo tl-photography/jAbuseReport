@@ -1,3 +1,6 @@
 /bin/
 auth.log*
 /test/
+/build/
+.gradle
+.settings
